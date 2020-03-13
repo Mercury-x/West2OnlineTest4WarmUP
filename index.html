@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Todo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+	<style type="text/css">
+		.div-checkbox{
+			/* margin: 20px; */
+			display: inline-block;
+		}
+		
+			
+		.todo-hover{
+
+		}
+		
+		.todo-hover:hover{
+			border-color: #3c763d;
+			border-color: #2b542c;
+			-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168;
+			box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168;
+			position: relative;
+		}
+		
+		.done-li{			
+			font-size: 16px;
+			width: 60%;
+			background-color: rgb(240,240,240);
+			/* border:1px solid rgb(240,240,240); */
+			margin-top: 5%;
+		}
+		.done-li p{
+			margin-left: 20px;
+			text-decoration: line-through;
+			color: gray;
+			word-break:break-all;
+		}
+		
+		.done-li div{
+			position: absolute;
+			right: 0;
+			bottom: -34px;
+			width: 60px;
+			height: 30px;
+			text-align: center;
+			line-height: 30px;
+		}
+
+		.done-li div:hover{
+			color: rgb(0,215,94);
+			background-color: rgb(233,233,233);
+			cursor: pointer;
+		}
+
+		.clear{
+			width: 60%;
+			height: 40px;
+			line-height: 40px;
+			cursor: pointer;
+			background-color: rgb(0,215,94);
+			font-size: 20px;
+			text-align: center;
+			position: absolute;
+			bottom: -60px;
+		}
+
+		  .scoller::-webkit-scrollbar {
+		  width : 10px; 
+		  height: 1px;
+		  }
+		  .scoller::-webkit-scrollbar-thumb {
+		  border-radius: 10px;
+		  box-shadow   : inset 0 0 5px rgba(0, 0, 0, 0.2);
+		  background   : #d5dfc2;
+		  }
+		  .scoller::-webkit-scrollbar-track {
+		  box-shadow   : inset 0 0 5px rgba(0, 0, 0, 0.2);
+		  border-radius: 10px;
+		  background   : #ededed;
+		  }
+		
+		.switchWorkGreen{
+			color: rgb(0,215,94);
+			cursor: pointer;
+		}
+		.switchWorkBlack{
+			color: black;
+			cursor: pointer;
+		}
+		
+		.showOperationClass{
+			overflow: hidden;
+			width: 62px;
+			height: 60px;
+			cursor: pointer;
+			position: absolute;
+			right: -33px;
+			top: -3px;
+		}
+		
+		.operationClass{
+			width: 62px;
+			height: 30px ;
+			border:1px solid rgb(240,240,240);
+			text-align: center;
+			line-height: 30px;
+		}
+		.operationClass:hover{
+			background-color: rgb(246,246,246);
+		}
+		
+
+
+		.fadein-anim{
+			-webkit-animation-name: fadeIn; 
+			-webkit-animation-duration: 0.5s; 
+			-webkit-animation-iteration-count: 1; 
+			-webkit-animation-delay: 0s; 
+			-webkit-animation-timing-function: ease-in;
+			
+			/* 用于调整操作框位置 */
+			position: relative;
+		}
+		
+		.fadeout-anim{
+			-webkit-animation-name: fadeOut;
+			-webkit-animation-duration: 0.5s; 
+			-webkit-animation-iteration-count: 1; 
+			-webkit-animation-delay: 0s; 
+			-webkit-animation-timing-function: ease-in;
+		}
+		
+		/* 淡入淡出动画 */
+		@-webkit-keyframes fadeIn {
+		0% {
+		opacity: 0; /*初始状态 透明度为0*/
+		}
+		50% {
+		opacity: 0; /*中间状态 透明度为0*/
+		}
+		100% {
+		opacity: 1; /*结尾状态 透明度为1*/
+		}
+		}
+
+		@-webkit-keyframes fadeOut {
+		0% {
+		opacity: 1;
+		/* height: 100%; */
+		}
+		50% {
+		opacity: 1;
+		/* height: 90%; */
+		}
+		100% {
+		opacity: 0;
+		}
+		}
+		
+	</style>
+	<!-- <script src="vue.js"></script> -->
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  </head>
+  <body>
+	<div class="container-fluid" id="root">
+<!-- 		<div class="box-left col-md-6" style="background-color: #FF0000;">
+			left
+		</div> -->
+		
+		<div class="box-right col-md-6">
+			<div class="box-right-input col-md-12 col-md-offset-8">
+			 <form v-on:submit.prevent="addNewTodo" class="has-success">
+				<!-- <h2>待办事项</h2> -->
+				<input type="text" class=" form-control input-lg col-xs-9" style="width: 60%;  margin-top: 20px; margin-left: 20px;" placeholder="有什么要做到？" v-model="inputVal" >
+			 </form>
+			 <div class="col-md-12"></div>
+			 <div class="col-md-3">
+				 <h4 class="text-center" :style="doStyle"  @click="switchWork">待办</h4>
+			 </div>
+			 <div class="col-md-3">
+				<h4 class="text-center" :style="doneStyle" @click="switchWork">已完成</h4>
+			 </div>
+			 
+			 <div class="col-md-12 scoller" v-show='queryDo' style="max-height: 400px; overflow: auto;" >
+				<ul class="list-unstyled">
+					<li
+					is='todo-item'
+					:key="todo.id"
+					v-for="(todo, index) in todos"
+					:todo="todo"
+					:index="index"
+					@remove_dotodone="doToDone"
+					@delfromtodos="delete_todo"
+					@to_top="todoFirst"
+					></li>
+				</ul>
+			 </div>
+			 
+			 <div class="col-md-12" v-show="!queryDo" style="position: relative;">
+				<ul class="list-unstyled scoller" style="max-height: 400px; overflow: auto;">
+					<li 
+					is="done-item"
+					v-for="(done, index) in dones"
+					:done='done'
+					:index="index"
+					:key='done.id'
+					@cancel_done="done_to_do"
+					></li>
+				</ul>
+				<div class="clear" @click="clearAllDone">全部清除</div>
+			 </div>
+			</div>
+		</div>
+	</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		
+		// localStorage
+		let todo_do;
+		let todo_done;
+		let storage ;
+		
+		if(localStorage.getItem('do')!=null)
+			todo_do = JSON.parse(localStorage.getItem('do'));
+		if(localStorage.getItem('done')!=null)
+			todo_done = JSON.parse(localStorage.getItem('done'))
+
+		// components
+		Vue.component("todo-item",{
+			props: ['todo', 'index'],
+			template: `<li :class="fade">
+							<div class="row">
+								<div class="col-md-1" style="margin-top: 1.2% ;cursor: pointer" @click="delFromDo"
+									:id="todo.id">
+									<svg :id="todo.id" t="1583842482662" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1910" width="28" height="28"><path d="M832 903.68h-634.88c-40.96 0-74.24-33.28-74.24-74.24V194.56c0-40.96 33.28-74.24 74.24-74.24h634.88c40.96 0 74.24 33.28 74.24 74.24v634.88c0 40.96-33.28 74.24-74.24 74.24z m-634.88-716.8c-4.096 0-7.68 3.584-7.68 7.68v634.88c0 4.096 3.584 7.68 7.68 7.68h634.88c4.096 0 7.68-3.584 7.68-7.68V194.56c0-4.096-3.584-7.68-7.68-7.68h-634.88z" fill="#CCCCCC" p-id="1911" :id="todo.id"></path></svg>
+								</div>
+								
+								<form v-on:submit.prevent="loseFocus" class="col-md-10 has-success" style="width: 51.5%;">
+								<input type="text" class=" form-control input-lg todo-hover" style=" background-color: white; border: none;" v-model="todo.content">
+								</form>
+								
+								<div class="col-md-1" style="margin-top: 1.2%;" @click="moreOperation">
+									<svg t="1583843997227" class="icon" style="cursor: pointer" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1948" width="20" height="20"><path d="M511.36 697.344a63.168 63.168 0 1 0 0 126.336 63.168 63.168 0 0 0 0-126.336zM511.36 444.672a63.168 63.168 0 1 0 0 126.336 63.168 63.168 0 0 0 0-126.336zM511.36 192a63.168 63.168 0 1 0 0 126.336 63.168 63.168 0 0 0 0-126.336z" fill="#2c2c2c" p-id="1949"></path></svg>
+									<div v-show="showOperation" class="showOperationClass" @mouseleave="mouseLeaveOpt">
+										<div class="operationClass" @click="del_todo">删除</div>
+										<div class="operationClass" @click="toTop">置顶</div>
+									</div>
+								</div>
+							</div>
+
+						</li>`,
+			
+			data: function(){
+				return {
+					isHover: false,
+					do: this.todo,
+					showOperation: false,
+					fade: 'fadein-anim'
+				}
+			},
+			
+			methods: {
+				hoverBgc: function(e)
+				{
+					// let li = e.target;
+					// console.log(li.parent()
+					// li.style.backgroundColor = 'red'
+				},
+				
+				loseFocus: function(e){
+					console.log(this.todo);
+					e.target.children[0].blur()
+				},
+				
+				delFromDo: function(e){
+					console.log(this.index);
+					this.$emit('remove_dotodone', this.index)
+				},
+				moreOperation: function()
+				{
+					this.showOperation = !this.showOperation;
+				},
+				
+				mouseLeaveOpt: function(){
+					this.showOperation = !this.showOperation
+				},
+				
+				del_todo: function(){
+					// this.fade = 'fadeout-anim'
+
+					// sleep(450).then(() => {
+					// 	console.log(1)
+					// 	})
+					
+					this.$emit('delfromtodos', this.index)
+					},
+				
+				
+				toTop: function(){
+					this.$emit('to_top',this.index)
+					this.showOperation = !this.showOperation
+				},
+				
+				},
+
+	
+			})
+		
+		// 已完成事件
+		Vue.component("done-item", {
+			props: ['done', 'index'],
+			
+			data: function(){
+				return {
+					
+				}
+			},
+			
+			template: `<li class="fadein-anim done-li">
+							<p>{{done.content}}</p>
+							<div @click="cancelDone">撤销</div>
+						</li>`,
+			
+			methods: {
+				cancelDone: function(){
+					this.$emit("cancel_done", this.index)
+					console.log(this.index)
+				}
+			}
+		})
+		
+		// root
+		let vm = new Vue({
+			el: '#root',
+			data: {
+				inputVal: '',
+				todos: todo_do,
+				dones: todo_done,
+				queryDo: true,
+				
+				doStyle:{
+					color: 'rgb(0,215,94)',
+					cursor: 'pointer'
+				},
+
+				doneStyle:{
+					color: 'black',
+					cursor: 'pointer'
+				}
+			},
+			methods: {
+				addNewTodo: function(){
+					if(this.inputVal.trim()=='')
+						return false
+					// 清空输入框 & unshift todos
+					if(this.todos == null)
+						this.todos = new Array();
+					this.todos.unshift({
+						id: Date.now().toString(),
+						content: this.inputVal,
+						isDone: false
+					});
+					this.inputVal = '';
+
+					localStorage.setItem("do", JSON.stringify(this.todos));
+				},
+				
+				doToDone: function(index){
+
+					if(this.dones == null)
+						this.dones = new Array();
+
+					let done = this.todos[index];
+					done.isDone = true;
+					
+					this.todos.splice(index, 1);
+					this.dones.unshift(done);
+					
+					localStorage.setItem("do", JSON.stringify(this.todos));
+					console.log(JSON.stringify(this.todos))
+					localStorage.setItem("done", JSON.stringify(this.dones));
+
+				},
+				
+				switchWork: function(){
+						this.queryDo = !this.queryDo;
+						
+						// 修改颜色
+						if(!this.queryDo)
+						{
+							this.doStyle.color= 'black';
+							this.doneStyle.color = 'rgb(0,215,94)'
+						}
+						else
+						{
+							this.doStyle.color= 'rgb(0,215,94)';
+							this.doneStyle.color = 'black'
+						}
+				},
+				
+				delete_todo: function(index){
+					this.todos.splice(index, 1);
+					
+					localStorage.setItem("do", JSON.stringify(this.todos));
+
+				},
+				
+				todoFirst: function(index){
+					let temp = this.todos[index]
+					this.todos.splice(index, 1);
+					this.todos.unshift(temp);
+
+					localStorage.setItem("do", JSON.stringify(this.todos));
+
+				},
+
+				done_to_do: function(index){
+					console.log("in")
+					this.todos.push(this.dones[index]);
+					this.dones.splice(index,1);
+					console.log(1)
+					localStorage.setItem("do", JSON.stringify(this.todos));
+					localStorage.setItem("done", JSON.stringify(this.dones));
+
+				},
+
+				clearAllDone: function(){
+					this.dones = [];
+					localStorage.setItem("done", JSON.stringify(this.dones));
+
+				}
+			}
+		})
+		
+		function sleep(time) {
+		  return new Promise((resolve) => setTimeout(resolve, time));
+			}
+
+	 </script>
+  </body>
+</html>
